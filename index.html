@@ -78,19 +78,19 @@
                 pointToLayer: function(feature, latlng) {
 
                     return L.circleMarker(latlng, {
-                        fillColor: "#439E8B",  // fill color of the circles
-                        color: '#439E8B',      // border color of the circles
+                        fillColor: "#501e65",  // fill color of the circles
+                        color: '#501e65',      // border color of the circles
                         weight: 2,             // circle line weight in pixels
-                        fillOpacity: 0.6       // fill opacity (0-1)
+                        fillOpacity: 0.5       // fill opacity (0-1)
                     }).on({
 
                         mouseover: function(e) {
                             this.openPopup();
-                            this.setStyle({fillColor: '501e65'});  // change fill color to green when mouseover a circle
+                            this.setStyle({fillColor: '439E8B'});  // change fill color to green when mouseover 
                         },
                         mouseout: function(e) {
                             this.closePopup();
-                            this.setStyle({fillColor: '#439E8B'});  // change fill color back to original color when mouseout a circle
+                            this.setStyle({fillColor: '#501e65'});  // change fill to original color when mouseout
                         }
                     });
                 }
