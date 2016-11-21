@@ -19,13 +19,12 @@
 
         L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
           attribution: 'Map data &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery &copy; <a href="http://mapbox.com">Mapbox</a>',
-          maxZoom:4,
-            minZoom:4,
-            id: 'mapbox.light',
-          accessToken: 'pk.eyJ1IjoiY3VyZW1hbmdvIiwiYSI6ImNpcTQ4cGFwbDAxbmVmd25vZGNiOTVzeGEifQ.GWZByYkIft6eMRha69C8nw'
+          id: 'mapbox.light',
+          accessToken: 'pk.eyJ1IjoiY3VyZW1hbmdvIiwiYSI6ImNpcTQ4cGFwbDAxbmVmd25vZGNiOTVzeGEifQ.GWZByYkIft6eMRha69C8nw'  //Your Access Token
         }).addTo(map);
 
-
+        // load the timeseries data
+        // change the file name to yours
         $.getJSON("city.json")
         .done(function(data) {
             var info = processData(data);
@@ -33,14 +32,15 @@
             createSliderUI(info.timestamps);
         });
 
-
+        // process the data to derive values that will be used later, for example,
+        // the timestamp names (i.e., the name of each column) for use in the time slider labels, and 
+        // the minimum/maximum values across the time series for use in a map legend (extra credit question)
         function processData(data) {
             var timestamps = [];
             var	min = Infinity;
             var	max = -Infinity;
 
             for (var feature in data.features) {
-
                 var properties = data.features[feature].properties;
 
                 for (var attribute in properties) {
@@ -68,26 +68,27 @@
             }
         }  
 
-
+        // draw the proportional symbols
         function createPropSymbols(timestamps, data) {
+            
             cities = L.geoJson(data, {
 
                 pointToLayer: function(feature, latlng) {
 
                     return L.circleMarker(latlng, {
-                        fillColor: "#501e65",
-                        color: '#311e39',
-                        weight: 2,
-                        fillOpacity: 0.6
+                        fillColor: "#501e65",  // fill color of the circles
+                        color: '#311e39',      // border color of the circles
+                        weight: 2,             // circle line weight in pixels
+                        fillOpacity: 0.6       // fill opacity (0-1)
                     }).on({
 
                         mouseover: function(e) {
                             this.openPopup();
-                            this.setStyle({color: 'yellow'});
+                            this.setStyle({fillColor: 'green'});  // change fill color to green when mouseover a circle
                         },
                         mouseout: function(e) {
                             this.closePopup();
-                            this.setStyle({color: '#311e39'});
+                            this.setStyle({fillColor: '#501e65'});  // change fill color back to original color when mouseout a circle
                         }
                     });
                 }
@@ -97,36 +98,38 @@
 
         } 
 
-
+        // resize each circle according to a value in the time series
         function updatePropSymbols(timestamp) {
 
             cities.eachLayer(function(layer) {
 
                 var props = layer.feature.properties;
                 var	radius = calcPropRadius(props[timestamp]);
+                
+                // pop-up information (when mouseover) for each city is also defined here
                 var	popupContent = "<b>" + timestamp + ' population: ' + String(props[timestamp]) + "</b><br>" +
                                    "<i>" + props.name + "</i> " ;
 
                 layer.setRadius(radius);
                 layer.bindPopup(popupContent, { offset: new L.Point(0,-radius) });
-
             });
         } 
 
-
+        // calculate the radius of the proportional symbols based on area
         function calcPropRadius(attributeValue) {
 
-            var scaleFactor = 0.001,
+            var scaleFactor = 0.001,   // the scale factor is used to scale the values; the units of the radius are in meters 
+                                       // you may determine the scale factor accordingly based on the range of the values and the mapping scale
                 area = attributeValue * scaleFactor;
 
             return Math.sqrt(area/Math.PI);
-
         } 
 
-
+        // add the temporal slider, no need to change anything for this lab
+        // here we use the HTML5 range type to create a simple slider
         function createSliderUI(timestamps) {
 
-            var sliderControl = L.control({ position: 'bottomleft'} );
+            var sliderControl = L.control({ position: 'bottomleft'} ); // position of the slider
 
             sliderControl.onAdd = function(map) {
 
@@ -152,10 +155,10 @@
             createTemporalLegend(timestamps[0]);
         } 
 
-
+        // add labels for the temporal slider, no need to change anything for this lab
         function createTemporalLegend(startTimestamp) {
 
-            var temporalLegend = L.control({ position: 'bottomleft' });
+            var temporalLegend = L.control({ position: 'bottomleft' }); // same position as the slider
 
             temporalLegend.onAdd = function(map) {
 
